@@ -1,35 +1,40 @@
-name: Ejemplo de Ejecución de Comandos Directos
+name: Ejecutar tmate y mostrar la URL (¡NO PARA CNC PERSISTENTE!)
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch:  # Para ejecutarlo manualmente
 
 jobs:
-  ejecutar_comandos:
+  tmate:
     runs-on: ubuntu-latest
     steps:
-      - name: Imprimir información
+      - name: Actualizar e instalar tmate
         run: |
-          echo "Información del sistema:"
-          uname -a
-          echo "Fecha y hora:"
-          date
-          echo "Usuarios conectados (si aplica):"
-          who
+          sudo apt-get update
+          sudo apt-get install -y tmate
 
-      - name: Comprobar espacio en disco
-        run: df -h
-
-      - name: Mostrar la versión de Python (si está instalado)
-        run: python --version 2>&1 || echo "Python no está instalado"
-
-      - name: Ejemplo de manipulación de archivos (¡con precaución!)
+      - name: Ejecutar tmate y obtener la URL
+        id: tmate_session
         run: |
-          echo "Creando un archivo de ejemplo..."
-          echo "Este es un ejemplo de contenido" > ejemplo.txt
-          echo "Contenido del archivo:"
-          cat ejemplo.txt
-          # ¡Cuidado!  Los archivos creados de esta manera son temporales
-          # y se eliminarán al finalizar el workflow.
+          # Ejecutar tmate en segundo plano
+          tmate &
+
+          # Esperar un poco para que tmate se inicie (esto puede ser problemático)
+          sleep 5
+
+          # Obtener la URL SSH de tmate (esto es lo más complicado)
+          URL=$(tmate show-messages | grep "ssh" | head -n 1 | awk '{print $3}')
+
+          # Imprimir la URL SSH
+          echo "::set-output name=url::$URL"
+          echo "URL SSH de tmate: $URL"
+
+      - name: Mantener la sesión activa (¡INSEGURO y LIMITADO!)
+        run: |
+          echo "Manteniendo la sesión tmate activa (¡LIMITADO!)"
+          # Este comando intentará mantener el workflow activo indefinidamente.
+          # Sin embargo, GitHub Actions tiene un límite de tiempo de ejecución,
+          # por lo que eventualmente se cerrará.
+          while true; do
+            sleep 60 # Dormir durante 60 segundos
+            echo "Sesión tmate activa..."
+          done
