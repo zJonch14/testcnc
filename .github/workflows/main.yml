@@ -1,35 +1,31 @@
-name: Conexión SSH con Tmate
+name: Tmate Session SSH Access
 
-# El workflow se ejecuta manualmente.
+# Se dispara ÚNICAMENTE de forma manual.
 on:
   workflow_dispatch:
 
-# Esto asegura que el workflow solo se ejecute una vez por cada evento de 'workflow_dispatch'
-# en la rama (o commit) específica. 'cancel-in-progress: true' es una buena práctica.
+# Opcional: Asegura que solo se ejecute una sesión a la vez.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  tmate_session:
+  tmate_connection:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout del código
+      - name: Checkout del código (Recomendado, pero opcional)
+        # Es buena práctica para tener el contexto de tu código en la sesión.
         uses: actions/checkout@v4
-
-      - name: Configurar Tmate SSH
+        
+      - name: Ejecutar Tmate y obtener la URL SSH
+        # Esta acción se encarga de instalar tmate, ejecutarlo, 
+        # e imprimir la conexión SSH/Web en los logs.
         uses: tmate-io/a-tmate-action@v2
         with:
-          # Puedes especificar una clave SSH si quieres una conexión más segura o persistente,
-          # pero por defecto, tmate genera una única vez.
-          # Puedes usar 'tmate-server-host' si quieres usar tu propio servidor tmate.
-          limit-access-to-actor: true # Limita el acceso al usuario que disparó el workflow
+          # Recomendación de seguridad: 
+          # Solo permite la conexión SSH al usuario que ejecutó el workflow.
+          limit-access-to-actor: true
           
-      # El paso anterior (a-tmate-action) imprime la conexión SSH y web.
-      # El script se detendrá aquí (por defecto) hasta que se cancele manualmente
-      # o pase el tiempo máximo del job (6 horas por defecto).
+      # El Job se queda 'corriendo' en este paso.
 
-      # Consejo: Si quieres que el job se detenga después de, por ejemplo, 1 hora,
-      # puedes añadir:
-      # timeout-minutes: 60
