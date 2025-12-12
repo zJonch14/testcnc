@@ -1,25 +1,38 @@
-name: tmate session
+name: Debug with tmate
 
 on:
-  workflow_dispatch:  # Permite ejecución manual
-  # También puedes usar otros triggers como:
-  # push:
-  #   branches: [ main ]
+  workflow_dispatch:  # Solo ejecución manual por seguridad
+    inputs:
+      timeout:
+        description: 'Timeout in minutes'
+        required: false
+        default: '30'
 
 jobs:
   debug:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        # Configuración opcional:
-        # timeout: 600  # Tiempo en segundos (10 minutos por defecto)
-        # limit-access-to-actor: true  # Solo tú puedes acceder
-        
-    - name: Do normal workflow tasks
+    - name: Install tmate
+      run: sudo apt-get update && sudo apt-get install -y tmate
+      
+    - name: Start tmate session
       run: |
-        echo "Tu sesión tmate está activa"
-        echo "Puedes conectarte con SSH mientras este job esté en ejecución"
-        sleep 300  # Mantiene el job activo por 5 minutos
+        # Iniciar sesión tmate
+        tmate -S /tmp/tmate.sock new-session -d
+        tmate -S /tmp/tmate.sock wait tmate-ready
+        
+        # Obtener información de conexión
+        echo "==========================================="
+        echo "🔧 TMATE DEBUG SESSION - GITHUB ACTIONS"
+        echo "==========================================="
+        echo "SSH: $(tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}')"
+        echo "Web: $(tmate -S /tmp/tmate.sock display -p '#{tmate_web}')"
+        echo "==========================================="
+        echo "Job ID: ${{ github.run_id }}"
+        echo "Runner: ${{ runner.name }}"
+        echo "Timeout: ${{ github.event.inputs.timeout }} minutes"
+        echo "==========================================="
+        
+        # Mantener sesión activa
+        sleep $(( ${{ github.event.inputs.timeout }} * 60 ))
