@@ -1,40 +1,22 @@
-name: Ejecutar tmate y mostrar la URL (¡NO PARA CNC PERSISTENTE!)
-
-on:
-  workflow_dispatch:  # Para ejecutarlo manualmente
-
-jobs:
-  tmate:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Actualizar e instalar tmate
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tmate
-
-      - name: Ejecutar tmate y obtener la URL
-        id: tmate_session
-        run: |
-          # Ejecutar tmate en segundo plano
-          tmate &
-
-          # Esperar un poco para que tmate se inicie (esto puede ser problemático)
-          sleep 5
-
-          # Obtener la URL SSH de tmate (esto es lo más complicado)
-          URL=$(tmate show-messages | grep "ssh" | head -n 1 | awk '{print $3}')
-
-          # Imprimir la URL SSH
+  - name: tmate sexo
+    id: tmate_session
+    run: |
+      tmate &
+      
+      # Bucle para esperar la URL
+      for i in $(seq 1 20); do  # Intenta 20 veces
+        URL=$(tmate show-messages | grep "ssh" | head -n 1 | awk '{print $3}')
+        if [ -n "$URL" ]; then
+          echo "URL encontrada: $URL"
           echo "::set-output name=url::$URL"
-          echo "URL SSH de tmate: $URL"
+          break
+        else
+          echo "Esperando la URL de tmate... Intento $i"
+          sleep 2  # Espera 2 segundos entre intentos
+        fi
+      done
 
-      - name: Mantener la sesión activa (¡INSEGURO y LIMITADO!)
-        run: |
-          echo "Manteniendo la sesión tmate activa (¡LIMITADO!)"
-          # Este comando intentará mantener el workflow activo indefinidamente.
-          # Sin embargo, GitHub Actions tiene un límite de tiempo de ejecución,
-          # por lo que eventualmente se cerrará.
-          while true; do
-            sleep 60 # Dormir durante 60 segundos
-            echo "Sesión tmate activa..."
-          done
+      if [ -z "$URL" ]; then
+        echo "Error: No se pudo obtener la URL de tmate después de varios intentos."
+        exit 1  # Fallar el paso si no se encuentra la URL
+      fi
