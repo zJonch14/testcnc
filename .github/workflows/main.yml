@@ -1,4 +1,4 @@
-  - name: tmate sexo
+   name: tmate sexo
     id: tmate_session
     run: |
       tmate &
