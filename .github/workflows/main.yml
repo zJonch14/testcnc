@@ -1,0 +1,39 @@
+name: Test Conexión CNC
+
+on:
+  workflow_dispatch: # Para ejecutarlo manualmente
+
+jobs:
+  cnc_server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener IP pública
+        id: get_ip
+        run: |
+          IP=$(curl -s ifconfig.me)
+          echo "::set-output name=ip::$IP"
+          echo "IP pública: $IP"
+
+      - name: Escuchar comandos (¡MUY INSEGURO!)
+        run: |
+          # Este es un intento MUY básico e inseguro de "escuchar" comandos.
+          # NO es una conexión persistente real.
+          # Usa netcat (nc) para "escuchar" en un puerto.
+          # ¡¡¡ESTO ES MUY PELIGROSO!!!  ¡¡¡NO LO HAGAS!!!
+          # Necesitas instalar netcat primero:
+          sudo apt-get update
+          sudo apt-get install -y netcat
+
+          # Elegir un puerto aleatorio (¡pero la aleatoriedad en GH Actions es limitada!)
+          PUERTO=$(( ( RANDOM % 10000 ) + 1024 )) # Puerto entre 1024 y 11023
+          echo "Puerto: $PUERTO"
+          echo "Escuchando en $IP:$PUERTO (¡NO ES UNA CONEXIÓN PERSISTENTE REAL!)"
+
+          # ¡¡¡ESTO ES MUY INSEGURO!!!  PERMITE QUE CUALQUIERA EJECUTE COMANDOS
+          # EN TU ENTORNO DE GITHUB ACTIONS.  NUNCA HAGAS ESTO.
+          nc -l -p $PUERTO -e /bin/bash  # ¡¡¡EXTREMADAMENTE PELIGROSO!!!
+
+          # Este script NUNCA TERMINARÁ, ya que nc está escuchando.
+          # GitHub Actions eventualmente lo matará por tiempo de ejecución.
+          # Esto es solo para demostrar que la "escucha" es posible,
+          # pero es completamente inviable para una CNC real.
