@@ -1,28 +1,25 @@
-name: Tmate Session SSH (Usando mxschmitt)
+name: tmate session
 
-# Se dispara ÚNICAMENTE de forma manual.
 on:
-  workflow_dispatch:
-
-# Opcional: Asegura que solo se ejecute una sesión a la vez.
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch:  # Permite ejecución manual
+  # También puedes usar otros triggers como:
+  # push:
+  #   branches: [ main ]
 
 jobs:
-  tmate_connection:
+  debug:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout del código (Opcional)
-        uses: actions/checkout@v4
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        # Configuración opcional:
+        # timeout: 600  # Tiempo en segundos (10 minutos por defecto)
+        # limit-access-to-actor: true  # Solo tú puedes acceder
         
-      - name: Iniciar sesión Tmate y mostrar conexión SSH
-        # ¡Usando la acción solicitada!
-        uses: mxschmitt/action-tmate@v3 
-        with:
-          # Esta opción mantiene la sesión activa hasta que la cierres 
-          # o el job alcance su tiempo máximo (6 horas).
-          limit-access-to-actor: true 
-          
-      # El Job se detendrá aquí, esperando la conexión SSH.
+    - name: Do normal workflow tasks
+      run: |
+        echo "Tu sesión tmate está activa"
+        echo "Puedes conectarte con SSH mientras este job esté en ejecución"
+        sleep 300  # Mantiene el job activo por 5 minutos
