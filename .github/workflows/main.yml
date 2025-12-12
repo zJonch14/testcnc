@@ -1,4 +1,4 @@
-name: Tmate Session SSH Accessakahahw
+name: Tmate Session SSH (Usando mxschmitt)
 
 # Se dispara ÚNICAMENTE de forma manual.
 on:
@@ -11,19 +11,18 @@ concurrency:
 
 jobs:
   tmate_connection:
-    # Usamos un runner estándar de Ubuntu
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout del código (Opcional, pero útil)
+      - name: Checkout del código (Opcional)
         uses: actions/checkout@v4
         
-      - name: Ejecutar Tmate y obtener la URL SSH
-        # ¡ESTA ES LA ACCIÓN CORREGIDA!
-        uses: max-sh/setup-tmate@v2 
+      - name: Iniciar sesión Tmate y mostrar conexión SSH
+        # ¡Usando la acción solicitada!
+        uses: mxschmitt/action-tmate@v3 
         with:
-          # Puedes especificar el tiempo máximo de inactividad de la sesión (en segundos)
-          tmate-session-limit: 3600 # 1 hora
+          # Esta opción mantiene la sesión activa hasta que la cierres 
+          # o el job alcance su tiempo máximo (6 horas).
+          limit-access-to-actor: true 
           
-      # El Job se queda 'corriendo' en este paso.
-
+      # El Job se detendrá aquí, esperando la conexión SSH.
