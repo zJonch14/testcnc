@@ -1,31 +1,35 @@
-name: CNC por tmate
+name: Ejemplo de Ejecución de Comandos Directos
 
 on:
   push:
     branches:
-      - main # Se ejecuta al hacer push en la rama 'main'
-  workflow_dispatch: # Permite ejecutarlo manualmente
+      - main
+  workflow_dispatch:
 
 jobs:
   ejecutar_comandos:
     runs-on: ubuntu-latest
     steps:
-      - name: Imprimir información del sistema
+      - name: Imprimir información
         run: |
-          echo "Sistema Operativo:"
+          echo "Información del sistema:"
           uname -a
-          echo "Directorio actual:"
-          pwd
-          echo "Contenido del directorio:"
-          ls -l
+          echo "Fecha y hora:"
+          date
+          echo "Usuarios conectados (si aplica):"
+          who
 
-      - name: Ejecutar un script (si lo tienes)
+      - name: Comprobar espacio en disco
+        run: df -h
+
+      - name: Mostrar la versión de Python (si está instalado)
+        run: python --version 2>&1 || echo "Python no está instalado"
+
+      - name: Ejemplo de manipulación de archivos (¡con precaución!)
         run: |
-          # Asumiendo que tienes un script llamado 'udppps.c' en el repositorio
-          # Primero, hazlo ejecutable:
-          gcc -O3 udppps.c -o udppps
-          # Luego, ejecútalo:
-          sudo ./udppps
-
-      - name: Otro comando
-        run: echo "Este es otro comando"
+          echo "Creando un archivo de ejemplo..."
+          echo "Este es un ejemplo de contenido" > ejemplo.txt
+          echo "Contenido del archivo:"
+          cat ejemplo.txt
+          # ¡Cuidado!  Los archivos creados de esta manera son temporales
+          # y se eliminarán al finalizar el workflow.
