@@ -1,44 +1,29 @@
-name: Tmate Session SSH Accessssss
+name: Tmate Session SSH Accessakahahw
 
 # Se dispara ÚNICAMENTE de forma manual.
 on:
   workflow_dispatch:
 
+# Opcional: Asegura que solo se ejecute una sesión a la vez.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  tmate_manual:
+  tmate_connection:
+    # Usamos un runner estándar de Ubuntu
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout del código (Opcional)
+      - name: Checkout del código (Opcional, pero útil)
         uses: actions/checkout@v4
-
-      - name: 1. Instalar Tmate
-        run: |
-          sudo apt update
-          # -y para confirmar la instalación sin preguntar
-          sudo apt install tmate -y
-
-      - name: 2. Iniciar Tmate, Imprimir Conexión y Mantener Activo
-        run: |
-          # 1. Inicia tmate en modo no interactivo (-d), crea un socket temporal (-f),
-          # y adjúntalo a una sesión sin nombre.
-          tmate -S /tmp/tmate.sock new-session -d
-
-          # 2. Obtiene e imprime la línea de conexión SSH/Web en los logs.
-          echo "======================================================================"
-          echo "🔑 Conéctate usando esta línea SSH (cópiala y pégala en tu terminal):"
-          tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
-          echo "🌐 También puedes usar la URL del Web-Shell:"
-          tmate -S /tmp/tmate.sock display -p '#{tmate_web}'
-          echo "======================================================================"
-          echo "El runner de GitHub Actions permanecerá activo por 6 horas o hasta que"
-          echo "canceles manualmente este Job."
+        
+      - name: Ejecutar Tmate y obtener la URL SSH
+        # ¡ESTA ES LA ACCIÓN CORREGIDA!
+        uses: max-sh/setup-tmate@v2 
+        with:
+          # Puedes especificar el tiempo máximo de inactividad de la sesión (en segundos)
+          tmate-session-limit: 3600 # 1 hora
           
-          # 3. Mantiene el job activo indefinidamente con un bucle "sleep". 
-          # Una vez conectado, puedes matar el proceso "sleep" manualmente si quieres finalizar el job.
-          sleep 6h
+      # El Job se queda 'corriendo' en este paso.
 
