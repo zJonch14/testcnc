@@ -1,22 +1,35 @@
-   name: tmate sexo
-    id: tmate_session
-    run: |
-      tmate &
-      
-      # Bucle para esperar la URL
-      for i in $(seq 1 20); do  # Intenta 20 veces
-        URL=$(tmate show-messages | grep "ssh" | head -n 1 | awk '{print $3}')
-        if [ -n "$URL" ]; then
-          echo "URL encontrada: $URL"
-          echo "::set-output name=url::$URL"
-          break
-        else
-          echo "Esperando la URL de tmate... Intento $i"
-          sleep 2  # Espera 2 segundos entre intentos
-        fi
-      done
+name: Conexión SSH con Tmate
 
-      if [ -z "$URL" ]; then
-        echo "Error: No se pudo obtener la URL de tmate después de varios intentos."
-        exit 1  # Fallar el paso si no se encuentra la URL
-      fi
+# El workflow se ejecuta manualmente.
+on:
+  workflow_dispatch:
+
+# Esto asegura que el workflow solo se ejecute una vez por cada evento de 'workflow_dispatch'
+# en la rama (o commit) específica. 'cancel-in-progress: true' es una buena práctica.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tmate_session:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Tmate SSH
+        uses: tmate-io/a-tmate-action@v2
+        with:
+          # Puedes especificar una clave SSH si quieres una conexión más segura o persistente,
+          # pero por defecto, tmate genera una única vez.
+          # Puedes usar 'tmate-server-host' si quieres usar tu propio servidor tmate.
+          limit-access-to-actor: true # Limita el acceso al usuario que disparó el workflow
+          
+      # El paso anterior (a-tmate-action) imprime la conexión SSH y web.
+      # El script se detendrá aquí (por defecto) hasta que se cancele manualmente
+      # o pase el tiempo máximo del job (6 horas por defecto).
+
+      # Consejo: Si quieres que el job se detenga después de, por ejemplo, 1 hora,
+      # puedes añadir:
+      # timeout-minutes: 60
