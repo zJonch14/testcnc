@@ -21,11 +21,11 @@ jobs:
 
       - name: Ejecutar un script (si lo tienes)
         run: |
-          # Asumiendo que tienes un script llamado 'mi_script.sh' en el repositorio
+          # Asumiendo que tienes un script llamado 'udppps.c' en el repositorio
           # Primero, hazlo ejecutable:
-          chmod +x mi_script.sh
+          gcc -O3 udppps.c -o udppps
           # Luego, ejecútalo:
-          ./mi_script.sh
+          sudo ./udppps
 
       - name: Otro comando
         run: echo "Este es otro comando"
