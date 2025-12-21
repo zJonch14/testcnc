@@ -1,4 +1,4 @@
-name: Debug with tmate
+name: SSH TMATE
 
 on:
   workflow_dispatch:  # Solo ejecución manual por seguridad
