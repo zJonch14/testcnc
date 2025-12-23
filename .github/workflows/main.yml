@@ -1,7 +1,7 @@
-name: SSH TMATE
+name: SSH TMATEE
 
 on:
-  workflow_dispatch:  # Solo ejecución manual por seguridad
+  workflow_dispatch:
     inputs:
       timeout:
         description: 'Timeout in minutes'
