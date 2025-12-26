@@ -1,4 +1,4 @@
-name: SSH TMATEE
+name: SSH TMATEEE
 
 on:
   workflow_dispatch:
